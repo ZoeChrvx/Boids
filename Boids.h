@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include <vector>
+#include "raymath.h"
 
 class Boids
 
@@ -14,12 +15,13 @@ public:
 	void Draw();
 
 	Vector2 boidPosition = Vector2{ boidX, boidY };
+
 private:
 	float boidX;
 	float boidY;
 	float boidSize;
-	Color boidColor;
+	Color boidColor; 
 
-
+	Vector2 direction;
 };
 
