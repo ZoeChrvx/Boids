@@ -13,8 +13,8 @@ public:
 	void SetPosition(float x, float y);
 	void Move(Vector2 move);
 	void Draw();
+	void Detection();
 
-	Vector2 boidPosition = Vector2{ boidX, boidY };
 
 private:
 	float boidX;
@@ -23,5 +23,6 @@ private:
 	Color boidColor; 
 
 	Vector2 direction;
+	Vector2 boidPosition = Vector2{ boidX, boidY };
 };
 
