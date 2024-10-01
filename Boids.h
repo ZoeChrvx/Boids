@@ -14,9 +14,11 @@ public:
 	void SetPosition(float x, float y);
 	void Move(Vector2 move);
 	void Draw();
+	int GetID();
+
 	Vector2 Detection(std::vector<Boids*>& boidList, std::vector<Obstacles*>& obstList);
-	int getID();
 	void Update(std::vector<Boids*> &boidList, std::vector<Obstacles*> &obstList);
+	Vector2 Aligment(std::vector<Boids*>& boidList);
 
 
 private:
@@ -24,8 +26,9 @@ private:
 	int boidID;
 	Color boidColor;
 	float minimumDistance;
-	Vector2 direction = Vector2One();
+	float maxPerceiveDistance;
 	float speed = 150;
+	Vector2 direction = Vector2One();
 	Vector2 boidPosition = Vector2{0,0 };
 };
 

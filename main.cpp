@@ -11,8 +11,8 @@ int main() {
     SetTargetFPS(60);
     vector<Boids*> boids;
     for (int i = 0; i < 500; i++) {
-        int randX = GetRandomValue(20, 1900);
-        int randY = GetRandomValue(20, 1060);
+        int randX = GetRandomValue(20, 1880);
+        int randY = GetRandomValue(20, 1040);
         
         boids.push_back(new Boids(randX, randY, 5, i, DARKPURPLE));
     }
