@@ -13,7 +13,7 @@ Boids::Boids(float x, float y, float size, int id, Color color)
 	boidColor = color;
 	boidID = id;
 	direction = { 1,1 };
-
+	minimumDistance = boidSize * 2;
 }
 
 Boids::~Boids()
@@ -28,12 +28,12 @@ void Boids::SetPosition(float x, float y)
 void Boids::Move(Vector2 move)
 {
 
-	move = Vector2Normalize(move);
+	//move = Vector2Normalize(move);
 
-	boidPosition = Vector2Add(boidPosition, move);
+	boidPosition = Vector2Add(boidPosition, Vector2Scale(move, 5.f));
 }
 
-Vector2 Boids::Detection(std::vector<Boids*>& boidList)
+Vector2 Boids::Detection(std::vector<Boids*>& boidList, std::vector<Obstacles*>& obstList)
 {
 	Vector2 finalDir = Vector2Zero();
 	for (Boids* b : boidList) 
@@ -49,11 +49,16 @@ Vector2 Boids::Detection(std::vector<Boids*>& boidList)
 		}
 	}
 
-	if (boidPosition.x <= boidSize / 2) finalDir.x = 2;
-	if (boidPosition.x >= 800 - boidSize / 2) finalDir.x = -2;
-	if (boidPosition.y <= boidSize / 2) finalDir.y = 2;
-	if (boidPosition.y >= 800 - boidSize / 2) 
-		finalDir.y = -2;
+	for (Obstacles* o : obstList) 
+	{
+		bool isCollision = CheckCollisionCircleRec(boidPosition, boidSize * 4.f, o->GetRectangle());
+		if (isCollision) 
+		{
+			Vector2 newDirection = Vector2Invert(Vector2Subtract(boidPosition, {o->GetRectangle().x, o->GetRectangle().y}));
+			newDirection = Vector2Normalize(newDirection);
+			finalDir = Vector2Add(finalDir, newDirection);
+		}
+	}
 
 	return Vector2Normalize(finalDir);
 }
@@ -67,15 +72,16 @@ int Boids::getID() {
 	return boidID;
 }
 
-void Boids::Update(std::vector<Boids*> &boidList)
+void Boids::Update(std::vector<Boids*> &boidList, std::vector<Obstacles*> &obstList)
 {
-	Vector2 speedMove = Vector2Zero();
-	speedMove = Vector2Add(speedMove, Detection(boidList));
+	Vector2 speedMove = direction;
+	speedMove = Vector2Add(speedMove, Detection(boidList, obstList));
 	if (Vector2Length(speedMove) <= 0) {
 		speedMove = direction;
 	}
-	Move(Vector2Normalize(speedMove));
-	direction = speedMove;
+	direction = Vector2Normalize(speedMove);
+	Move(direction);
+	
 }
 
 

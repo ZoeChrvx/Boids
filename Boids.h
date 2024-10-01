@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include <vector>
 #include "raymath.h"
+#include "Obstacles.h"
 
 class Boids
 
@@ -13,16 +14,16 @@ public:
 	void SetPosition(float x, float y);
 	void Move(Vector2 move);
 	void Draw();
-	Vector2 Detection(std::vector<Boids*>& boidList);
+	Vector2 Detection(std::vector<Boids*>& boidList, std::vector<Obstacles*>& obstList);
 	int getID();
-	void Update(std::vector<Boids*> &boidList);
+	void Update(std::vector<Boids*> &boidList, std::vector<Obstacles*> &obstList);
 
 
 private:
 	float boidSize;
 	int boidID;
 	Color boidColor;
-	float minimumDistance = 30;
+	float minimumDistance;
 	Vector2 direction = Vector2One();
 	float speed = 150;
 	Vector2 boidPosition = Vector2{0,0 };
