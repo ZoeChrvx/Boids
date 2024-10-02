@@ -11,11 +11,12 @@ int main() {
     Texture2D fishTexture = LoadTexture("resources/WhiteFish.png");
     SetTargetFPS(60);
     vector<Boids*> boids;
-    for (int i = 0; i < 500; i++) {
+    for (int i = 0; i < 800; i++) {
         int randX = GetRandomValue(20, 1880);
         int randY = GetRandomValue(20, 1040);
+        int randEquip = GetRandomValue(1, 3);
         
-        boids.push_back(new Boids(randX, randY, 5, i, DARKPURPLE, fishTexture));
+        boids.push_back(new Boids(randX, randY, 10, i, randEquip, DARKPURPLE, fishTexture));
     }
     vector<Obstacles*> obstacles;
     obstacles.push_back(new Obstacles({ 300, 150, 100, 300 }, BROWN));

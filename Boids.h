@@ -9,12 +9,14 @@ class Boids
 {
 public:
 	Boids();
-	Boids(float x, float y, float size, int id, Color color, Texture2D texture);
+	Boids(float x, float y, float size, int id, int equip, Color color, Texture2D texture);
 	~Boids();
 	void SetPosition(float x, float y);
 	void Move(Vector2 move);
 	void Draw();
 	int GetID();
+	int GetEquip();
+	void SetColor(Color color);
 
 	void Update(std::vector<Boids*> &boidList, std::vector<Obstacles*> &obstList);
 
@@ -22,9 +24,11 @@ public:
 	Vector2 Group(std::vector<Boids*>& boidList);
 	Vector2 Avoid(std::vector<Boids*>& boidList);
 	Vector2 AvoidObstacles(std::vector<Obstacles*>& obstacleList);
+	Vector2 AvoidMouse();
 
 
 private:
+	int boidEquip;
 	float boidSize;
 	int boidID;
 	Color boidColor;
