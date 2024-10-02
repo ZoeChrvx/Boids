@@ -9,16 +9,19 @@ class Boids
 {
 public:
 	Boids();
-	Boids(float x, float y, float size, int id, Color color);
+	Boids(float x, float y, float size, int id, Color color, Texture2D texture);
 	~Boids();
 	void SetPosition(float x, float y);
 	void Move(Vector2 move);
 	void Draw();
 	int GetID();
 
-	Vector2 Detection(std::vector<Boids*>& boidList, std::vector<Obstacles*>& obstList);
 	void Update(std::vector<Boids*> &boidList, std::vector<Obstacles*> &obstList);
+
 	Vector2 Aligment(std::vector<Boids*>& boidList);
+	Vector2 Group(std::vector<Boids*>& boidList);
+	Vector2 Avoid(std::vector<Boids*>& boidList);
+	Vector2 AvoidObstacles(std::vector<Obstacles*>& obstacleList);
 
 
 private:
@@ -27,8 +30,10 @@ private:
 	Color boidColor;
 	float minimumDistance;
 	float maxPerceiveDistance;
+	float cohesionRadius;
 	float speed = 150;
 	Vector2 direction = Vector2One();
 	Vector2 boidPosition = Vector2{0,0 };
+	Texture2D boidTexture;
 };
 
