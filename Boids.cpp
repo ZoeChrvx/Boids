@@ -5,7 +5,7 @@ Boids::Boids()
 {
 }
 
-Boids::Boids(float x, float y, float size, int id, int equip, Color color, Texture2D texture)
+Boids::Boids(float x, float y, float size, int id, int equip, int enemyEquip, Color color, Texture2D texture)
 {
 	boidPosition.x = x;
 	boidPosition.y = y;
@@ -18,6 +18,7 @@ Boids::Boids(float x, float y, float size, int id, int equip, Color color, Textu
 	cohesionRadius = boidSize * 30;
 	boidTexture = texture;
 	boidEquip = equip;
+	boidEnemyEquip = enemyEquip;
 }
 
 Boids::~Boids()
@@ -97,6 +98,9 @@ Vector2 Boids::Aligment(std::vector<Boids*>& boidList)
 		if (b->boidID == boidID) {
 			continue;
 		}
+		if (b->boidEquip != boidEquip) {
+			break;
+		}
 		float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
 		if (currentDistance < maxPerceiveDistance) 
 		{
@@ -119,6 +123,9 @@ Vector2 Boids::Group(std::vector<Boids*>& boidList)
 		if(b->boidID==boidID)
 		{
 			continue;
+		}
+		if (b->boidEquip != boidEquip) {
+			break;
 		}
 		float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
 		if (currentDistance < cohesionRadius) {
@@ -144,6 +151,7 @@ Vector2 Boids::Avoid(std::vector<Boids*>& boidList)
 		if (b->boidID == boidID) {
 			continue;
 		}
+
 		float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
 		if (currentDistance < minimumDistance) {
 			newDirection = Vector2Subtract(boidPosition, b->boidPosition);

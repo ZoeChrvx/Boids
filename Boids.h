@@ -9,7 +9,7 @@ class Boids
 {
 public:
 	Boids();
-	Boids(float x, float y, float size, int id, int equip, Color color, Texture2D texture);
+	Boids(float x, float y, float size, int id, int equip, int enemyEquip, Color color, Texture2D texture);
 	~Boids();
 	void SetPosition(float x, float y);
 	void Move(Vector2 move);
@@ -29,6 +29,7 @@ public:
 
 private:
 	int boidEquip;
+	int boidEnemyEquip;
 	float boidSize;
 	int boidID;
 	Color boidColor;

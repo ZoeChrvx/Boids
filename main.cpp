@@ -15,8 +15,19 @@ int main() {
         int randX = GetRandomValue(20, 1880);
         int randY = GetRandomValue(20, 1040);
         int randEquip = GetRandomValue(1, 3);
+        int enemyEquip = 0;
+        if (randEquip == 1) {
+            enemyEquip == 2;
+        }
+        else if (randEquip == 2) {
+            enemyEquip == 3;
+        }
+        else {
+            enemyEquip == 1;
+        }
+
         
-        boids.push_back(new Boids(randX, randY, 10, i, randEquip, DARKPURPLE, fishTexture));
+        boids.push_back(new Boids(randX, randY, 10, i, randEquip, enemyEquip, DARKPURPLE, fishTexture));
     }
     vector<Obstacles*> obstacles;
     obstacles.push_back(new Obstacles({ 300, 150, 100, 300 }, BROWN));
