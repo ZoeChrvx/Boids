@@ -25,6 +25,8 @@ public:
 	Vector2 Avoid(std::vector<Boids*>& boidList);
 	Vector2 AvoidObstacles(std::vector<Obstacles*>& obstacleList);
 	Vector2 AvoidMouse();
+	Vector2 AvoidPredator(std::vector<Boids*>& boidList);
+	Vector2 Attack(std::vector<Boids*> boidList);
 
 
 private:

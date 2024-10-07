@@ -1,5 +1,7 @@
 #include "Boids.h"
 #include "raymath.h"
+#include <iostream>
+#include <algorithm>
 
 Boids::Boids()
 {
@@ -80,13 +82,14 @@ void Boids::Update(std::vector<Boids*>& boidList, std::vector<Obstacles*>& obstL
 	speedMove = Vector2Add(speedMove, Vector2Scale(AvoidObstacles(obstList), 0.7f));
 	speedMove = Vector2Add(speedMove, Vector2Scale(Aligment(boidList), 0.5f));
 	speedMove = Vector2Add(speedMove, Vector2Scale(Group(boidList), 0.05f));
-	speedMove = Vector2Add(speedMove, Vector2Scale(AvoidMouse(), 0.7f));
+	speedMove = Vector2Add(speedMove, Vector2Scale(AvoidMouse(), 0.9f));
+	speedMove = Vector2Add(speedMove, Vector2Scale(AvoidPredator(boidList), 1.f));
+	//speedMove = Vector2Add(speedMove, Vector2Scale(Attack(boidList), 1.f));
 	if (Vector2Length(speedMove) <= 0) {
 		//speedMove = direction;
 	}
 	direction = Vector2Normalize(speedMove);
 	Move(direction);
-
 }
 
 Vector2 Boids::Aligment(std::vector<Boids*>& boidList)
@@ -98,15 +101,15 @@ Vector2 Boids::Aligment(std::vector<Boids*>& boidList)
 		if (b->boidID == boidID) {
 			continue;
 		}
-		if (b->boidEquip != boidEquip) {
-			break;
+		if (b->GetEquip() == boidEquip) {
+			float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
+			if (currentDistance < maxPerceiveDistance)
+			{
+				directionTotal = Vector2Add(directionTotal, b->direction);
+				count++;
+			}
 		}
-		float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
-		if (currentDistance < maxPerceiveDistance) 
-		{
-			directionTotal = Vector2Add(directionTotal, b->direction);
-			count++;
-		}
+		
 	}
 	if(count != 0)
 		directionTotal = Vector2{ directionTotal.x / count, directionTotal.y / count };
@@ -124,16 +127,16 @@ Vector2 Boids::Group(std::vector<Boids*>& boidList)
 		{
 			continue;
 		}
-		if (b->boidEquip != boidEquip) {
-			break;
+		if (b->GetEquip() == boidEquip) {
+			float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
+			if (currentDistance < cohesionRadius) {
+				newDirection = Vector2Subtract(b->boidPosition, boidPosition);
+				newDirection = Vector2Normalize(newDirection);
+				positionTotal = Vector2Add(positionTotal, newDirection);
+				count++;
+			}
 		}
-		float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
-		if (currentDistance < cohesionRadius) {
-			newDirection = Vector2Subtract(b->boidPosition, boidPosition);
-			newDirection = Vector2Normalize(newDirection);
-			positionTotal = Vector2Add(positionTotal, newDirection);
-			count++;
-		}
+		
 	}
 	if (count != 0)
 	{
@@ -195,6 +198,65 @@ Vector2 Boids::AvoidMouse()
 	separation = Vector2Normalize(separation);
 
 	return separation;
+}
+
+Vector2 Boids::AvoidPredator(std::vector<Boids*>& boidList)
+{
+	Vector2 separation = Vector2Zero();
+	for (Boids* b : boidList)
+	{
+		if (b->boidID == boidID) {
+			continue;
+		}
+		if (b->GetEquip() == boidEnemyEquip) {
+			float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
+			if (currentDistance < minimumDistance*30.f) {
+				newDirection = Vector2Subtract(boidPosition, b->boidPosition);
+				newDirection = Vector2Normalize(newDirection);
+				separation = Vector2Add(separation, newDirection);
+			}
+		}
+	}
+	separation = Vector2Normalize(separation);
+
+	return separation;
+}
+
+Vector2 Boids::Attack(std::vector<Boids*> boidList)
+{
+	Vector2 positionTotal = Vector2Zero();
+	int count = 0;
+	for (Boids* b : boidList)
+	{
+		if (b->boidID == boidID)
+		{
+			continue;
+		}
+		if (b->GetEquip() != boidEquip && b->GetEquip() != boidEnemyEquip) 
+		{
+			float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
+			if (currentDistance < cohesionRadius*1.2f) {
+				newDirection = Vector2Subtract(b->boidPosition, boidPosition);
+				newDirection = Vector2Normalize(newDirection);
+				positionTotal = Vector2Add(positionTotal, newDirection);
+				/*if (currentDistance < minimumDistance * 0.8f) {
+					auto tmp = std::remove(&boidList.begin(), &boidList.end(), b);
+					&boidList.erase(tmp);
+					boidList.erase(std::remove(&boidList.begin(), &boidList.end(), b), &boidList.end());
+				}*/
+				count++;
+			}
+		}
+
+	}
+
+
+	if (count != 0)
+	{
+		positionTotal = Vector2{ positionTotal.x / count, positionTotal.y / count };
+	}
+
+	return Vector2Normalize(positionTotal);
 }
 
 

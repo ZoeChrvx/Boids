@@ -12,17 +12,23 @@ int main() {
     SetTargetFPS(60);
     vector<Boids*> boids;
     for (int i = 0; i < 800; i++) {
-        int randX = GetRandomValue(20, 1880);
-        int randY = GetRandomValue(20, 1040);
+        int randX;
+        int randY;
         int randEquip = GetRandomValue(1, 3);
         int enemyEquip = 0;
         if (randEquip == 1) {
+            randX = GetRandomValue(20, 600);
+            randY = GetRandomValue(20, 200);
             enemyEquip == 2;
         }
         else if (randEquip == 2) {
+            randX = GetRandomValue(620, 1200);
+            randY = GetRandomValue(220, 400);
             enemyEquip == 3;
         }
         else {
+            randX = GetRandomValue(1220, 1880);
+             randY = GetRandomValue(420, 1040);
             enemyEquip == 1;
         }
 
