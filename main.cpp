@@ -11,29 +11,31 @@ int main() {
     Texture2D fishTexture = LoadTexture("resources/WhiteFish.png");
     SetTargetFPS(60);
     vector<Boids*> boids;
-    for (int i = 0; i < 800; i++) {
+    for (int i = 0; i < 500; i++) {
         int randX;
         int randY;
         int randEquip = GetRandomValue(1, 3);
-        int enemyEquip = 0;
+        int enemyEquip;
+        randX = GetRandomValue(20, 1880);
+        randY = GetRandomValue(20, 1040);
         if (randEquip == 1) {
-            randX = GetRandomValue(20, 600);
-            randY = GetRandomValue(20, 200);
-            enemyEquip == 2;
+            // randX = GetRandomValue(20, 600);
+            // randY = GetRandomValue(20, 200);
+            enemyEquip = 2;
         }
         else if (randEquip == 2) {
-            randX = GetRandomValue(620, 1200);
-            randY = GetRandomValue(220, 400);
-            enemyEquip == 3;
+            // randX = GetRandomValue(620, 1200);
+            // randY = GetRandomValue(220, 400);
+            enemyEquip = 3;
         }
         else {
-            randX = GetRandomValue(1220, 1880);
-             randY = GetRandomValue(420, 1040);
-            enemyEquip == 1;
+             // randX = GetRandomValue(1220, 1880);
+             //  randY = GetRandomValue(420, 1040);
+            enemyEquip = 1;
         }
 
         
-        boids.push_back(new Boids(randX, randY, 10, i, randEquip, enemyEquip, DARKPURPLE, fishTexture));
+        boids.push_back(new Boids(randX, randY, 20, i, randEquip, enemyEquip, DARKPURPLE, fishTexture));
     }
     vector<Obstacles*> obstacles;
     obstacles.push_back(new Obstacles({ 300, 150, 100, 300 }, BROWN));
@@ -48,16 +50,27 @@ int main() {
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLUE);
+        vector<Boids*> toDelete = {};
         for (Boids* b : boids) {
-            b->Update(boids, obstacles);  
+            b->Update(boids, obstacles);
         }
-
-        for (Boids* b : boids) {
-            b->Draw();
+        // cout<<toDelete.size()<<endl;
+        for (vector<Boids*>::iterator it = boids.begin(); it < boids.end();) {
+            if(!(*it)->mIsAlive)
+            {
+                it = boids.erase(it);
+            }
+            else ++it;
         }
+        
+        
         for (Obstacles* o : obstacles) {
             o->Draw();
         }
+        for (Boids* b : boids) {
+            b->Draw();
+        }
+
 
         EndDrawing();
     }

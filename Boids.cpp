@@ -7,7 +7,7 @@ Boids::Boids()
 {
 }
 
-Boids::Boids(float x, float y, float size, int id, int equip, int enemyEquip, Color color, Texture2D texture)
+Boids::Boids(float x, float y, float size, int id, int equip, int enemyEquip, Color color, Texture2D texture):mIsAlive(true)
 {
 	boidPosition.x = x;
 	boidPosition.y = y;
@@ -37,7 +37,8 @@ void Boids::Move(Vector2 move)
 
 	//move = Vector2Normalize(move);
 
-	boidPosition = Vector2Clamp(Vector2Add(boidPosition, Vector2Scale(move, 3.f)), { 20,20 }, { 1900, 1060 });
+	// boidPosition = Vector2Clamp(Vector2Add(boidPosition, Vector2Scale(move, 3.f)), { 20,20 }, { 1900, 1060 });
+	boidPosition = Vector2Add(boidPosition, Vector2Scale(move, 3.f));
 }
 
 Vector2 newDirection;
@@ -77,18 +78,19 @@ void Boids::SetColor(Color color)
 
 void Boids::Update(std::vector<Boids*>& boidList, std::vector<Obstacles*>& obstList)
 {
-	Vector2 speedMove = direction;
+	Vector2 speedMove = Vector2Zero();
 	speedMove = Vector2Add(speedMove, Vector2Scale(Avoid(boidList), 0.5f));
-	speedMove = Vector2Add(speedMove, Vector2Scale(AvoidObstacles(obstList), 0.7f));
-	speedMove = Vector2Add(speedMove, Vector2Scale(Aligment(boidList), 0.5f));
+	speedMove = Vector2Add(speedMove, Vector2Scale(AvoidObstacles(obstList), 1000.f));
+	speedMove = Vector2Add(speedMove, Vector2Scale(Aligment(boidList), 0.6f));
 	speedMove = Vector2Add(speedMove, Vector2Scale(Group(boidList), 0.05f));
 	speedMove = Vector2Add(speedMove, Vector2Scale(AvoidMouse(), 0.9f));
-	speedMove = Vector2Add(speedMove, Vector2Scale(AvoidPredator(boidList), 1.f));
-	//speedMove = Vector2Add(speedMove, Vector2Scale(Attack(boidList), 1.f));
+	speedMove = Vector2Add(speedMove, Vector2Scale(AvoidPredator(boidList), .2f));
+	speedMove = Vector2Add(speedMove, Vector2Scale(Attack(boidList), 0.8f));
 	if (Vector2Length(speedMove) <= 0) {
 		//speedMove = direction;
 	}
-	direction = Vector2Normalize(speedMove);
+	speedMove = Vector2Normalize(speedMove);
+	direction = Vector2Normalize(Vector2Add(direction, speedMove));
 	Move(direction);
 }
 
@@ -172,7 +174,7 @@ Vector2 Boids::AvoidObstacles(std::vector<Obstacles*>& obstacleList)
 	Vector2 avoidance = Vector2Zero();
 	for (Obstacles* o : obstacleList)
 	{
-		bool isCollision = CheckCollisionCircleRec(boidPosition, boidSize * 5.f, o->GetRectangle());
+		bool isCollision = IsCollidingAabb(o->GetRectangle(), 20.f);//CheckCollisionCircleRec(boidPosition, boidSize * 5.f, o->GetRectangle());
 		if (isCollision)
 		{
 			Vector2 newDirection = Vector2Invert(Vector2Subtract(boidPosition, { o->GetRectangle().x, o->GetRectangle().y }));
@@ -210,7 +212,7 @@ Vector2 Boids::AvoidPredator(std::vector<Boids*>& boidList)
 		}
 		if (b->GetEquip() == boidEnemyEquip) {
 			float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
-			if (currentDistance < minimumDistance*30.f) {
+			if (currentDistance < minimumDistance*5.f) {
 				newDirection = Vector2Subtract(boidPosition, b->boidPosition);
 				newDirection = Vector2Normalize(newDirection);
 				separation = Vector2Add(separation, newDirection);
@@ -222,30 +224,34 @@ Vector2 Boids::AvoidPredator(std::vector<Boids*>& boidList)
 	return separation;
 }
 
-Vector2 Boids::Attack(std::vector<Boids*> boidList)
+Vector2 Boids::Attack(std::vector<Boids*>& boidList)
 {
 	Vector2 positionTotal = Vector2Zero();
-	int count = 0;
+	int count = 0, boidIndex = 0;
 	for (Boids* b : boidList)
 	{
 		if (b->boidID == boidID)
 		{
+			boidIndex ++;
 			continue;
 		}
 		if (b->GetEquip() != boidEquip && b->GetEquip() != boidEnemyEquip) 
 		{
 			float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
-			if (currentDistance < cohesionRadius*1.2f) {
+			if (currentDistance < boidSize * 10.f) {
 				newDirection = Vector2Subtract(b->boidPosition, boidPosition);
 				newDirection = Vector2Normalize(newDirection);
 				positionTotal = Vector2Add(positionTotal, newDirection);
-				/*if (currentDistance < minimumDistance * 0.8f) {
-					auto tmp = std::remove(&boidList.begin(), &boidList.end(), b);
-					&boidList.erase(tmp);
-					boidList.erase(std::remove(&boidList.begin(), &boidList.end(), b), &boidList.end());
-				}*/
+				if (currentDistance < boidSize* 3.f && Vector2DotProduct(direction, Vector2Subtract(boidPosition, b->boidPosition)) > 0) {
+					b->Die();					
+				}else
+				{
+					boidIndex ++;
+
+				}
 				count++;
 			}
+			if(count > 5) break;
 		}
 
 	}
@@ -257,6 +263,19 @@ Vector2 Boids::Attack(std::vector<Boids*> boidList)
 	}
 
 	return Vector2Normalize(positionTotal);
+}
+
+bool Boids::IsCollidingAabb(Rectangle obstacle, float margin)
+{
+	return boidPosition.x < (obstacle.x + margin + obstacle.width)
+	&& (boidPosition.x + boidSize) > (obstacle.x - margin)
+	&& boidPosition.y < (obstacle.y + margin + obstacle.height)
+	&& (boidPosition.y + boidSize) > (obstacle.y- margin);
+}
+
+void Boids::Die()
+{
+	mIsAlive = false;
 }
 
 

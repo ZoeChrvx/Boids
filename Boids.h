@@ -26,8 +26,11 @@ public:
 	Vector2 AvoidObstacles(std::vector<Obstacles*>& obstacleList);
 	Vector2 AvoidMouse();
 	Vector2 AvoidPredator(std::vector<Boids*>& boidList);
-	Vector2 Attack(std::vector<Boids*> boidList);
+	Vector2 Attack(std::vector<Boids*>& boidList);
+	bool IsCollidingAabb(Rectangle obstacle, float margin = 5.0f);
+	void Die();
 
+	bool mIsAlive;
 
 private:
 	int boidEquip;
