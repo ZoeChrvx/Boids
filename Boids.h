@@ -8,9 +8,9 @@ class Boids
 
 {
 public:
-	Boids();
 	Boids(float x, float y, float size, int id, int equip, int enemyEquip, Color color, Texture2D texture);
 	~Boids();
+
 	void SetPosition(float x, float y);
 	void Move(Vector2 move);
 	void Draw();
@@ -33,17 +33,18 @@ public:
 	bool mIsAlive;
 
 private:
-	int boidEquip;
-	int boidEnemyEquip;
-	float boidSize;
-	int boidID;
-	Color boidColor;
+	int mTeam;
+	int mEnemyTeam;
+	float mSize;
+	int mID;
+	Color mColor;
 	float minimumDistance;
 	float maxPerceiveDistance;
 	float cohesionRadius;
-	float speed = 150;
-	Vector2 direction = Vector2One();
-	Vector2 boidPosition = Vector2{0,0 };
-	Texture2D boidTexture;
+	float mSpeed;
+	Vector2 mDirection;
+	float mTurnSpeed;
+	Vector2 mPosition;
+	Texture2D mTexture;
 };
 

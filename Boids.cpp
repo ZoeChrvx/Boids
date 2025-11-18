@@ -3,24 +3,20 @@
 #include <iostream>
 #include <algorithm>
 
-Boids::Boids()
+Boids::Boids(float x, float y, float size, int id, int equip, int enemyEquip, Color color, Texture2D texture) : mIsAlive{true}, mSpeed{150.f}, mDirection{Vector2One()}, mPosition{0.f}
 {
-}
-
-Boids::Boids(float x, float y, float size, int id, int equip, int enemyEquip, Color color, Texture2D texture):mIsAlive(true)
-{
-	boidPosition.x = x;
-	boidPosition.y = y;
-	boidSize = size;
-	boidColor = color;
-	boidID = id;
-	direction = { 1,1 };
-	minimumDistance = boidSize * 2;
-	maxPerceiveDistance = boidSize * 10;
-	cohesionRadius = boidSize * 30;
-	boidTexture = texture;
-	boidEquip = equip;
-	boidEnemyEquip = enemyEquip;
+	mPosition.x = x;
+	mPosition.y = y;
+	mSize = size;
+	mColor = color;
+	mID = id;
+	mDirection = { 1,1 };
+	minimumDistance = mSize * 2;
+	maxPerceiveDistance = mSize * 10;
+	cohesionRadius = mSize * 30;
+	mTexture = texture;
+	mTeam = equip;
+	mEnemyTeam = enemyEquip;
 }
 
 Boids::~Boids()
@@ -29,8 +25,8 @@ Boids::~Boids()
 
 void Boids::SetPosition(float x, float y)
 {
-	boidPosition.x = x;
-	boidPosition.y = y;
+	mPosition.x = x;
+	mPosition.y = y;
 }
 void Boids::Move(Vector2 move)
 {
@@ -38,7 +34,7 @@ void Boids::Move(Vector2 move)
 	//move = Vector2Normalize(move);
 
 	// boidPosition = Vector2Clamp(Vector2Add(boidPosition, Vector2Scale(move, 3.f)), { 20,20 }, { 1900, 1060 });
-	boidPosition = Vector2Add(boidPosition, Vector2Scale(move, 3.f));
+	mPosition = Vector2Add(mPosition, Vector2Scale(move, 3.f));
 }
 
 Vector2 newDirection;
@@ -48,13 +44,13 @@ Vector2 newDirection;
 void Boids::Draw()
 {
 	//DrawCircle((int)boidPosition.x, (int)boidPosition.y, boidSize, boidColor);
-	float angle = Vector2Angle({ -1,0 }, direction) * (-180.f / PI);
-	DrawTexturePro(boidTexture, { 0,0, float(boidTexture.height),float(boidTexture.width) }, { boidPosition.x, boidPosition.y, boidSize, boidSize }, { boidSize / 2, boidSize / 2 }, angle, boidColor);
+	float angle = Vector2Angle({ -1,0 }, mDirection) * (-180.f / PI);
+	DrawTexturePro(mTexture, { 0,0, float(mTexture.height),float(mTexture.width) }, { mPosition.x, mPosition.y, mSize, mSize }, { mSize / 2, mSize / 2 }, angle, mColor);
 
-	if (boidEquip == 1) {
+	if (mTeam == 1) {
 		SetColor(DARKBLUE);
 	}
-	else if (boidEquip == 2) {
+	else if (mTeam == 2) {
 		SetColor(DARKGREEN);
 	}
 	else {
@@ -63,17 +59,17 @@ void Boids::Draw()
 }
 
 int Boids::GetID() {
-	return boidID;
+	return mID;
 }
 
 int Boids::GetEquip()
 {
-	return boidEquip;
+	return mTeam;
 }
 
 void Boids::SetColor(Color color)
 {
-	boidColor = color;
+	mColor = color;
 }
 
 void Boids::Update(std::vector<Boids*>& boidList, std::vector<Obstacles*>& obstList)
@@ -90,8 +86,8 @@ void Boids::Update(std::vector<Boids*>& boidList, std::vector<Obstacles*>& obstL
 		//speedMove = direction;
 	}
 	speedMove = Vector2Normalize(speedMove);
-	direction = Vector2Normalize(Vector2Add(direction, speedMove));
-	Move(direction);
+	mDirection = Vector2Normalize(Vector2Add(mDirection, speedMove));
+	Move(mDirection);
 }
 
 Vector2 Boids::Aligment(std::vector<Boids*>& boidList)
@@ -100,14 +96,14 @@ Vector2 Boids::Aligment(std::vector<Boids*>& boidList)
 	int count=0;
 	for (Boids* b : boidList)
 	{
-		if (b->boidID == boidID) {
+		if (b->mID == mID) {
 			continue;
 		}
-		if (b->GetEquip() == boidEquip) {
-			float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
+		if (b->GetEquip() == mTeam) {
+			float currentDistance = Vector2Distance(b->mPosition, mPosition);
 			if (currentDistance < maxPerceiveDistance)
 			{
-				directionTotal = Vector2Add(directionTotal, b->direction);
+				directionTotal = Vector2Add(directionTotal, b->mDirection);
 				count++;
 			}
 		}
@@ -125,14 +121,14 @@ Vector2 Boids::Group(std::vector<Boids*>& boidList)
 	int count = 0;
 	for (Boids* b : boidList) 
 	{
-		if(b->boidID==boidID)
+		if(b->mID==mID)
 		{
 			continue;
 		}
-		if (b->GetEquip() == boidEquip) {
-			float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
+		if (b->GetEquip() == mTeam) {
+			float currentDistance = Vector2Distance(b->mPosition, mPosition);
 			if (currentDistance < cohesionRadius) {
-				newDirection = Vector2Subtract(b->boidPosition, boidPosition);
+				newDirection = Vector2Subtract(b->mPosition, mPosition);
 				newDirection = Vector2Normalize(newDirection);
 				positionTotal = Vector2Add(positionTotal, newDirection);
 				count++;
@@ -153,13 +149,13 @@ Vector2 Boids::Avoid(std::vector<Boids*>& boidList)
 	Vector2 separation = Vector2Zero();
 	for (Boids* b : boidList)
 	{
-		if (b->boidID == boidID) {
+		if (b->mID == mID) {
 			continue;
 		}
 
-		float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
+		float currentDistance = Vector2Distance(b->mPosition, mPosition);
 		if (currentDistance < minimumDistance) {
-			newDirection = Vector2Subtract(boidPosition, b->boidPosition);
+			newDirection = Vector2Subtract(mPosition, b->mPosition);
 			newDirection = Vector2Normalize(newDirection);
 			separation = Vector2Add(separation, newDirection);
 		}
@@ -177,7 +173,7 @@ Vector2 Boids::AvoidObstacles(std::vector<Obstacles*>& obstacleList)
 		bool isCollision = IsCollidingAabb(o->GetRectangle(), 20.f);//CheckCollisionCircleRec(boidPosition, boidSize * 5.f, o->GetRectangle());
 		if (isCollision)
 		{
-			Vector2 newDirection = Vector2Invert(Vector2Subtract(boidPosition, { o->GetRectangle().x, o->GetRectangle().y }));
+			Vector2 newDirection = Vector2Invert(Vector2Subtract(mPosition, { o->GetRectangle().x, o->GetRectangle().y }));
 			newDirection = Vector2Normalize(newDirection);
 			avoidance = Vector2Add(avoidance, newDirection);
 		}
@@ -192,10 +188,10 @@ Vector2 Boids::AvoidMouse()
 	Vector2 mouse = GetMousePosition();
 	Vector2 separation = Vector2Zero();
 	
-	float currentDistance = Vector2Distance(mouse, boidPosition);
+	float currentDistance = Vector2Distance(mouse, mPosition);
 	if (currentDistance < 100)
 	{
-		separation = Vector2Subtract(boidPosition, mouse);
+		separation = Vector2Subtract(mPosition, mouse);
 	}
 	separation = Vector2Normalize(separation);
 
@@ -207,13 +203,13 @@ Vector2 Boids::AvoidPredator(std::vector<Boids*>& boidList)
 	Vector2 separation = Vector2Zero();
 	for (Boids* b : boidList)
 	{
-		if (b->boidID == boidID) {
+		if (b->mID == mID) {
 			continue;
 		}
-		if (b->GetEquip() == boidEnemyEquip) {
-			float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
+		if (b->GetEquip() == mEnemyTeam) {
+			float currentDistance = Vector2Distance(b->mPosition, mPosition);
 			if (currentDistance < minimumDistance*5.f) {
-				newDirection = Vector2Subtract(boidPosition, b->boidPosition);
+				newDirection = Vector2Subtract(mPosition, b->mPosition);
 				newDirection = Vector2Normalize(newDirection);
 				separation = Vector2Add(separation, newDirection);
 			}
@@ -230,19 +226,19 @@ Vector2 Boids::Attack(std::vector<Boids*>& boidList)
 	int count = 0, boidIndex = 0;
 	for (Boids* b : boidList)
 	{
-		if (b->boidID == boidID)
+		if (b->mID == mID)
 		{
 			boidIndex ++;
 			continue;
 		}
-		if (b->GetEquip() != boidEquip && b->GetEquip() != boidEnemyEquip) 
+		if (b->GetEquip() != mTeam && b->GetEquip() != mEnemyTeam) 
 		{
-			float currentDistance = Vector2Distance(b->boidPosition, boidPosition);
-			if (currentDistance < boidSize * 10.f) {
-				newDirection = Vector2Subtract(b->boidPosition, boidPosition);
+			float currentDistance = Vector2Distance(b->mPosition, mPosition);
+			if (currentDistance < mSize * 10.f) {
+				newDirection = Vector2Subtract(b->mPosition, mPosition);
 				newDirection = Vector2Normalize(newDirection);
 				positionTotal = Vector2Add(positionTotal, newDirection);
-				if (currentDistance < boidSize* 3.f && Vector2DotProduct(direction, Vector2Subtract(boidPosition, b->boidPosition)) > 0) {
+				if (currentDistance < mSize* 3.f && Vector2DotProduct(mDirection, Vector2Subtract(mPosition, b->mPosition)) > 0) {
 					b->Die();					
 				}else
 				{
@@ -267,10 +263,10 @@ Vector2 Boids::Attack(std::vector<Boids*>& boidList)
 
 bool Boids::IsCollidingAabb(Rectangle obstacle, float margin)
 {
-	return boidPosition.x < (obstacle.x + margin + obstacle.width)
-	&& (boidPosition.x + boidSize) > (obstacle.x - margin)
-	&& boidPosition.y < (obstacle.y + margin + obstacle.height)
-	&& (boidPosition.y + boidSize) > (obstacle.y- margin);
+	return mPosition.x < (obstacle.x + margin + obstacle.width)
+	&& (mPosition.x + mSize) > (obstacle.x - margin)
+	&& mPosition.y < (obstacle.y + margin + obstacle.height)
+	&& (mPosition.y + mSize) > (obstacle.y- margin);
 }
 
 void Boids::Die()
